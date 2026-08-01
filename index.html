@@ -126,6 +126,7 @@
       height: 20px;
       vertical-align: middle;
       margin-right: 6px;
+      object-fit: contain;
     }
 
     .pts {
@@ -164,49 +165,6 @@
   <script>
     let currentLeague = 'mls';
     let currentGroup = 7; // 7 = East, 8 = West
-
-    // Explicit MLS Datasets
-    const mlsFallback = {
-      7: [ // Eastern Conference
-        { name: "Inter Miami", gp: 17, w: 11, d: 4, l: 2, pts: 37, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/19126.png" },
-        { name: "FC Cincinnati", gp: 17, w: 10, d: 3, l: 4, pts: 33, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/18267.png" },
-        { name: "Columbus Crew", gp: 17, w: 8, d: 6, l: 3, pts: 30, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/182.png" },
-        { name: "New York Red Bulls", gp: 17, w: 8, d: 5, l: 4, pts: 29, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/188.png" },
-        { name: "NYCFC", gp: 18, w: 8, d: 5, l: 5, pts: 29, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/17606.png" },
-        { name: "Charlotte FC", gp: 17, w: 7, d: 4, l: 6, pts: 25, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/20906.png" },
-        { name: "Nashville SC", gp: 17, w: 6, d: 5, l: 6, pts: 23, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/18986.png" },
-        { name: "Toronto FC", gp: 18, w: 7, d: 3, l: 8, pts: 24, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/7318.png" },
-        { name: "Philadelphia Union", gp: 17, w: 4, d: 8, l: 5, pts: 20, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/11903.png" },
-        { name: "D.C. United", gp: 17, w: 4, d: 7, l: 6, pts: 19, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/193.png" },
-        { name: "Atlanta United", gp: 17, w: 4, d: 4, l: 9, pts: 16, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/18418.png" },
-        { name: "Chicago Fire", gp: 16, w: 3, d: 6, l: 7, pts: 15, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/183.png" },
-        { name: "New England Revolution", gp: 16, w: 4, d: 1, l: 11, pts: 13, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/186.png" }
-      ],
-      8: [ // Western Conference
-        { name: "Real Salt Lake", gp: 17, w: 9, d: 6, l: 2, pts: 33, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/189.png" },
-        { name: "LAFC", gp: 16, w: 9, d: 3, l: 4, pts: 30, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/18776.png" },
-        { name: "Minnesota United", gp: 16, w: 8, d: 5, l: 3, pts: 29, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/17362.png" },
-        { name: "LA Galaxy", gp: 17, w: 7, d: 7, l: 3, pts: 28, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/187.png" },
-        { name: "Colorado Rapids", gp: 17, w: 7, d: 4, l: 6, pts: 25, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/184.png" },
-        { name: "Vancouver Whitecaps", gp: 16, w: 7, d: 4, l: 5, pts: 25, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/8987.png" },
-        { name: "Houston Dynamo", gp: 16, w: 6, d: 4, l: 6, pts: 22, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/599.png" },
-        { name: "Austin FC", gp: 17, w: 6, d: 5, l: 6, pts: 23, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/19722.png" },
-        { name: "Portland Timbers", gp: 17, w: 5, d: 6, l: 6, pts: 21, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/9723.png" },
-        { name: "Seattle Sounders", gp: 17, w: 4, d: 6, l: 7, pts: 18, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/9720.png" },
-        { name: "St. Louis CITY SC", gp: 16, w: 3, d: 9, l: 4, pts: 18, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/20531.png" },
-        { name: "FC Dallas", gp: 16, w: 3, d: 5, l: 8, pts: 14, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/185.png" },
-        { name: "Sporting KC", gp: 17, w: 3, d: 5, l: 9, pts: 14, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/18265.png" },
-        { name: "San Jose Earthquakes", gp: 17, w: 3, d: 2, l: 12, pts: 11, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/191.png" }
-      ]
-    };
-
-    // Pre-season CFB Fallback
-    const cfbFallback = {
-      8: ["Georgia Bulldogs", "Texas Longhorns", "Alabama Crimson Tide", "Ole Miss Rebels", "LSU Tigers", "Tennessee Volunteers"],
-      4: ["Ohio State Buckeyes", "Oregon Ducks", "Penn State Nittany Lions", "Michigan Wolverines", "USC Trojans"],
-      1: ["Florida State Seminoles", "Clemson Tigers", "Miami Hurricanes", "Louisville Cardinals"],
-      12: ["Utah Utes", "Kansas State Wildcats", "Arizona Wildcats", "Oklahoma State Cowboys"]
-    };
 
     const config = {
       mls: {
@@ -277,75 +235,88 @@
       const thead = document.getElementById('table-head');
       
       thead.innerHTML = config[currentLeague].headers;
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#70757a;">Loading live feed...</td></tr>';
 
-      if (currentLeague === 'mls') {
-        // Direct rendering from fallback dataset to guarantee instant separation
-        const list = (mlsFallback[currentGroup] || mlsFallback[7]).sort((a, b) => b.pts - a.pts || b.w - a.w);
-        renderMlsRows(list);
-        return;
-      }
-
-      // College Football Handling
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#70757a;">Loading feed...</td></tr>';
       try {
-        const response = await fetch(config.cfb.endpoint(currentGroup));
+        const response = await fetch(config[currentLeague].endpoint(currentGroup));
         const data = await response.json();
-        const entries = data.children?.[0]?.standings?.entries || data.standings?.entries || [];
+        
+        // Handle varying ESPN API response structures
+        let entries = [];
+        if (data.children && data.children.length > 0) {
+          // If returning grouped conferences
+          const matchGroup = data.children.find(c => c.id == currentGroup || c.groupId == currentGroup);
+          entries = matchGroup?.standings?.entries || data.children[0]?.standings?.entries || [];
+        } else if (data.standings?.entries) {
+          entries = data.standings.entries;
+        }
 
-        if (!entries || entries.length === 0) throw new Error('Empty');
+        if (!entries || entries.length === 0) throw new Error('No entries found');
 
-        tbody.innerHTML = entries.map((item, index) => {
-          const getStatVal = (names) => {
-            for (let n of names) {
-              let s = item.stats?.find(x => x.name === n || x.type === n);
-              if (s && s.displayValue !== undefined) return s.displayValue;
+        if (currentLeague === 'mls') {
+          // Helper to extract numeric stats from ESPN's stat objects
+          const getVal = (item, keys) => {
+            for (let k of keys) {
+              let s = item.stats?.find(x => x.name === k || x.type === k);
+              if (s && s.value !== undefined) return s.value;
             }
-            return '0';
+            return 0;
           };
 
-          return `
+          const parsed = entries.map(item => ({
+            name: item.team.shortDisplayName || item.team.displayName,
+            logo: item.team.logos?.[0]?.href || '',
+            gp: getVal(item, ['gamesPlayed', 'gp']),
+            w: getVal(item, ['wins', 'w']),
+            d: getVal(item, ['ties', 'draws', 'd']),
+            l: getVal(item, ['losses', 'l']),
+            pts: getVal(item, ['points', 'pts'])
+          })).sort((a, b) => b.pts - a.pts || b.w - a.w);
+
+          tbody.innerHTML = parsed.map((team, index) => `
             <tr>
               <td class="align-left">
                 <span class="rank">${index + 1}</span>
-                ${item.team.logos?.[0]?.href ? `<img src="${item.team.logos[0].href}" class="team-logo">` : ''}
-                <span class="team-name">${item.team.shortDisplayName || item.team.displayName}</span>
+                ${team.logo ? `<img src="${team.logo}" class="team-logo" onerror="this.style.display='none'">` : ''}
+                <span class="team-name">${team.name}</span>
               </td>
-              <td>${getStatVal(['confWins', 'vsconf', 'wins'])}-${getStatVal(['confLosses', 'losses'])}</td>
-              <td>${getStatVal(['wins', 'total'])}-${getStatVal(['losses'])}</td>
+              <td>${team.gp}</td>
+              <td>${team.w}</td>
+              <td>${team.d}</td>
+              <td>${team.l}</td>
+              <td class="pts">${team.pts}</td>
             </tr>
-          `;
-        }).join('');
-      } catch (err) {
-        const teams = cfbFallback[currentGroup] || cfbFallback[8];
-        tbody.innerHTML = teams.map((teamName, index) => `
-          <tr>
-            <td class="align-left">
-              <span class="rank">${index + 1}</span>
-              <span class="team-name">${teamName}</span>
-            </td>
-            <td>0-0</td>
-            <td>0-0</td>
-          </tr>
-        `).join('');
-      }
-    }
+          `).join('');
 
-    function renderMlsRows(teams) {
-      const tbody = document.getElementById('standings-body');
-      tbody.innerHTML = teams.map((team, index) => `
-        <tr>
-          <td class="align-left">
-            <span class="rank">${index + 1}</span>
-            ${team.logo ? `<img src="${team.logo}" class="team-logo">` : ''}
-            <span class="team-name">${team.name}</span>
-          </td>
-          <td>${team.gp}</td>
-          <td>${team.w}</td>
-          <td>${team.d}</td>
-          <td>${team.l}</td>
-          <td class="pts">${team.pts}</td>
-        </tr>
-      `).join('');
+        } else {
+          // Parse CFB Live
+          tbody.innerHTML = entries.map((item, index) => {
+            const getStatVal = (names) => {
+              for (let n of names) {
+                let s = item.stats?.find(x => x.name === n || x.type === n);
+                if (s && s.displayValue !== undefined) return s.displayValue;
+              }
+              return '0';
+            };
+
+            return `
+              <tr>
+                <td class="align-left">
+                  <span class="rank">${index + 1}</span>
+                  ${item.team.logos?.[0]?.href ? `<img src="${item.team.logos[0].href}" class="team-logo">` : ''}
+                  <span class="team-name">${item.team.shortDisplayName || item.team.displayName}</span>
+                </td>
+                <td>${getStatVal(['confWins', 'vsconf', 'wins'])}-${getStatVal(['confLosses', 'losses'])}</td>
+                <td>${getStatVal(['wins', 'total'])}-${getStatVal(['losses'])}</td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+      } catch (err) {
+        console.error("Fetch error:", err);
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#d93025;">Unable to load live data right now. Please refresh in a moment.</td></tr>';
+      }
     }
 
     // Initialize
