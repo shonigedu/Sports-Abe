@@ -5,76 +5,132 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>College Football Standings</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Hide scrollbar for clean tab browsing */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-800 p-6 font-sans">
-  <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6">
-    <h1 class="text-2xl font-bold mb-4 text-center">College Football Standings</h1>
+<body class="bg-gray-100 min-h-screen text-gray-900 font-sans p-2 sm:p-6 flex justify-center items-start">
+
+  <!-- Main Google-style Sports Card -->
+  <div class="w-full max-w-2xl bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
     
-    <!-- Conference Selector -->
-    <div class="mb-6 flex justify-center">
-      <select id="conferenceSelect" onchange="loadStandings()" class="p-2 border rounded-md bg-white shadow-sm font-medium">
-        <option value="8">SEC</option>
-        <option value="1">ACC</option>
-        <option value="4">Big Ten</option>
-        <option value="12">Big 12</option>
-        <option value="151">American</option>
-      </select>
+    <!-- Card Header -->
+    <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        <h1 class="text-lg font-semibold text-gray-900">NCAA Football Standings</h1>
+      </div>
+      <span class="text-xs bg-gray-100 text-gray-600 font-medium px-2.5 py-1 rounded-full">Live</span>
+    </div>
+
+    <!-- Google-style Scrollable Conference Pills -->
+    <div class="px-4 pt-3 pb-2 border-b border-gray-100 overflow-x-auto no-scrollbar flex gap-2" id="pillContainer">
+      <button onclick="switchConf(8, this)" class="conf-pill active bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-full whitespace-nowrap transition-colors">SEC</button>
+      <button onclick="switchConf(4, this)" class="conf-pill bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold px-4 py-2 rounded-full whitespace-nowrap transition-colors">Big Ten</button>
+      <button onclick="switchConf(1, this)" class="conf-pill bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold px-4 py-2 rounded-full whitespace-nowrap transition-colors">ACC</button>
+      <button onclick="switchConf(12, this)" class="conf-pill bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold px-4 py-2 rounded-full whitespace-nowrap transition-colors">Big 12</button>
+      <button onclick="switchConf(151, this)" class="conf-pill bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold px-4 py-2 rounded-full whitespace-nowrap transition-colors">AAC</button>
+      <button onclick="switchConf(121, this)" class="conf-pill bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold px-4 py-2 rounded-full whitespace-nowrap transition-colors">MWC</button>
+      <button onclick="switchConf(15, this)" class="conf-pill bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold px-4 py-2 rounded-full whitespace-nowrap transition-colors">Sun Belt</button>
     </div>
 
     <!-- Standings Table -->
     <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
+      <table class="w-full text-left text-xs sm:text-sm">
         <thead>
-          <tr class="border-b bg-gray-50">
-            <th class="p-3">Team</th>
-            <th class="p-3 text-center">Conf</th>
-            <th class="p-3 text-center">Overall</th>
+          <tr class="text-gray-500 font-medium border-b border-gray-100 bg-gray-50/50">
+            <th class="py-2.5 px-4 font-semibold">TEAM</th>
+            <th class="py-2.5 px-3 text-center font-semibold">CONF</th>
+            <th class="py-2.5 px-3 text-center font-semibold">OVERALL</th>
+            <th class="py-2.5 px-4 text-center font-semibold hidden sm:table-cell">STREAK</th>
           </tr>
         </thead>
-        <tbody id="standingsBody">
-          <tr><td colspan="3" class="p-4 text-center text-gray-500">Loading standings...</td></tr>
+        <tbody id="standingsBody" class="divide-y divide-gray-100">
+          <tr>
+            <td colspan="4" class="py-8 text-center text-gray-400 font-medium">Loading standings...</td>
+          </tr>
         </tbody>
       </table>
     </div>
+
   </div>
 
   <script>
-    async function loadStandings() {
-      const group = document.getElementById('conferenceSelect').value;
+    let currentGroupId = 8;
+
+    function switchConf(groupId, btnElement) {
+      currentGroupId = groupId;
+      
+      // Update active pill UI
+      document.querySelectorAll('.conf-pill').forEach(btn => {
+        btn.className = 'conf-pill bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold px-4 py-2 rounded-full whitespace-nowrap transition-colors';
+      });
+      btnElement.className = 'conf-pill active bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-full whitespace-nowrap transition-colors';
+
+      loadStandings(groupId);
+    }
+
+    async function loadStandings(group) {
       const tbody = document.getElementById('standingsBody');
-      tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-gray-500">Loading live data...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" class="py-8 text-center text-gray-400 font-medium">Loading standings...</td></tr>';
 
       try {
-        const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/standings?group=${group}`);
-        const data = await response.json();
-        const entries = data.children[0].standings.entries;
+        const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/standings?groups=${group}`);
+        if (!response.ok) throw new Error('API request failed');
 
-        tbody.innerHTML = entries.map(item => {
-          const name = item.team.displayName;
-          const logo = item.team.logos[0]?.href || '';
+        const data = await response.json();
+        
+        let entries = [];
+        if (data.children && data.children.length > 0 && data.children[0].standings) {
+          entries = data.children[0].standings.entries;
+        } else if (data.standings) {
+          entries = data.standings.entries;
+        }
+
+        if (!entries || entries.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" class="py-8 text-center text-gray-500">No standings available right now.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = entries.map((item, idx) => {
+          const name = item.team.shortDisplayName || item.team.displayName;
+          const logo = item.team.logos?.[0]?.href || '';
           
-          const overallWins = item.stats.find(s => s.name === 'wins')?.displayValue || '0';
-          const overallLosses = item.stats.find(s => s.name === 'losses')?.displayValue || '0';
-          const confWins = item.stats.find(s => s.name === 'confWins')?.displayValue || '0';
-          const confLosses = item.stats.find(s => s.name === 'confLosses')?.displayValue || '0';
+          // Stat extraction
+          const confWins = item.stats?.find(s => s.name === 'confWins')?.displayValue || '0';
+          const confLosses = item.stats?.find(s => s.name === 'confLosses')?.displayValue || '0';
+          const overallWins = item.stats?.find(s => s.name === 'wins')?.displayValue || '0';
+          const overallLosses = item.stats?.find(s => s.name === 'losses')?.displayValue || '0';
+          const streak = item.stats?.find(s => s.name === 'streak')?.displayValue || '-';
+
+          // Rank badge (AP/CFP Rank if available)
+          const rank = item.curatedRank?.current && item.curatedRank.current < 99 ? item.curatedRank.current : null;
 
           return `
-            <tr class="border-b hover:bg-gray-50">
-              <td class="p-3 flex items-center gap-3">
-                ${logo ? `<img src="${logo}" class="w-6 h-6 object-contain">` : ''}
-                <span class="font-semibold">${name}</span>
+            <tr class="hover:bg-gray-50/80 transition-colors">
+              <td class="py-3 px-4 flex items-center gap-3">
+                <span class="text-xs font-semibold text-gray-400 w-4 text-right">${idx + 1}</span>
+                ${logo ? `<img src="${logo}" class="w-6 h-6 object-contain" alt="">` : ''}
+                <div class="flex items-center gap-1.5">
+                  ${rank ? `<span class="text-[10px] font-bold bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded">${rank}</span>` : ''}
+                  <span class="font-semibold text-gray-900">${name}</span>
+                </div>
               </td>
-              <td class="p-3 text-center font-medium">${confWins}-${confLosses}</td>
-              <td class="p-3 text-center text-gray-600">${overallWins}-${overallLosses}</td>
+              <td class="py-3 px-3 text-center font-semibold text-gray-900">${confWins}-${confLosses}</td>
+              <td class="py-3 px-3 text-center text-gray-500">${overallWins}-${overallLosses}</td>
+              <td class="py-3 px-4 text-center text-gray-500 font-medium hidden sm:table-cell">${streak}</td>
             </tr>
           `;
         }).join('');
+
       } catch (err) {
-        tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-500">Failed to fetch live standings.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="py-8 text-center text-red-500">Unable to load live data.</td></tr>';
       }
     }
 
-    loadStandings();
+    loadStandings(currentGroupId);
   </script>
 </body>
 </html>
