@@ -230,7 +230,7 @@
       loadStandings();
     }
 
-    async function loadStandings() {
+async function loadStandings() {
       const tbody = document.getElementById('standings-body');
       const thead = document.getElementById('table-head');
       
@@ -238,23 +238,17 @@
       tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#70757a;">Loading live feed...</td></tr>';
 
       try {
-        const response = await fetch(config[currentLeague].endpoint(currentGroup));
-        const data = await response.json();
-        
-        // Handle varying ESPN API response structures
-        let entries = [];
-        if (data.children && data.children.length > 0) {
-          // If returning grouped conferences
-          const matchGroup = data.children.find(c => c.id == currentGroup || c.groupId == currentGroup);
-          entries = matchGroup?.standings?.entries || data.children[0]?.standings?.entries || [];
-        } else if (data.standings?.entries) {
-          entries = data.standings.entries;
-        }
-
-        if (!entries || entries.length === 0) throw new Error('No entries found');
-
         if (currentLeague === 'mls') {
-          // Helper to extract numeric stats from ESPN's stat objects
+          // Fetch full MLS standings directly
+          const response = await fetch('https://site.api.espn.com/apis/v2/sports/soccer/usa.1/standings');
+          const data = await response.json();
+          
+          // Match Eastern (7) vs Western (8) dynamically from ESPN's children array
+          const confGroup = data.children?.find(c => c.id == currentGroup || (currentGroup == 8 ? c.name?.toLowerCase().includes('west') : c.name?.toLowerCase().includes('east')));
+          const entries = confGroup?.standings?.entries || data.standings?.entries || [];
+
+          if (!entries || entries.length === 0) throw new Error('No MLS entries found');
+
           const getVal = (item, keys) => {
             for (let k of keys) {
               let s = item.stats?.find(x => x.name === k || x.type === k);
@@ -289,7 +283,13 @@
           `).join('');
 
         } else {
-          // Parse CFB Live
+          // Fetch College Football
+          const response = await fetch(config.cfb.endpoint(currentGroup));
+          const data = await response.json();
+          const entries = data.children?.[0]?.standings?.entries || data.standings?.entries || [];
+
+          if (!entries || entries.length === 0) throw new Error('No CFB entries found');
+
           tbody.innerHTML = entries.map((item, index) => {
             const getStatVal = (names) => {
               for (let n of names) {
