@@ -2,72 +2,314 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MLS 2026 Standings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sports Standings</title>
   <style>
-    body { font-family: sans-serif; margin: 20px; background-color: #f4f4f9; }
-    .table-container { max-width: 650px; margin: 0 auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    table { width: 100%; border-collapse: collapse; text-align: right; }
-    th, td { padding: 10px; border-bottom: 1px solid #ddd; }
-    th:first-child, td:first-child { text-align: left; }
-    th { font-weight: bold; background-color: #f8f9fa; }
-    .pts { font-weight: bold; color: #1a73e8; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f8f9fa;
+      color: #202124;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .card {
+      max-width: 720px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    /* Top League Selector */
+    .league-nav {
+      background: #f8f9fa;
+      padding: 12px 16px;
+      border-bottom: 1px solid #e8eaed;
+      display: flex;
+      gap: 8px;
+    }
+
+    .league-btn {
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid #dadce0;
+      background: #ffffff;
+      color: #3c4043;
+      cursor: pointer;
+    }
+
+    .league-btn.active {
+      background: #1a73e8;
+      color: #ffffff;
+      border-color: #1a73e8;
+    }
+
+    /* Sub-header & Conference Pills */
+    .card-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e8eaed;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      background: #ffffff;
+    }
+
+    .pill-btn {
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 16px;
+      border: none;
+      background: #f1f3f4;
+      color: #3c4043;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .pill-btn.active {
+      background: #202124;
+      color: #ffffff;
+    }
+
+    /* Standings Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      text-align: right;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #f1f3f4;
+    }
+
+    th {
+      font-weight: 500;
+      color: #70757a;
+      font-size: 12px;
+      text-transform: uppercase;
+      background-color: #fafafa;
+    }
+
+    th.align-left, td.align-left {
+      text-align: left;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .rank {
+      color: #70757a;
+      width: 24px;
+      display: inline-block;
+      font-weight: 500;
+    }
+
+    .team-name {
+      font-weight: 500;
+      color: #202124;
+    }
+
+    .team-logo {
+      width: 20px;
+      height: 20px;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    .pts {
+      font-weight: 700;
+      color: #1a73e8;
+    }
   </style>
 </head>
 <body>
 
-<div class="table-container">
-  <h2>MLS Eastern Conference (2026)</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Club</th>
-        <th>GP</th>
-        <th>W</th>
-        <th>D</th>
-        <th>L</th>
-        <th>PTS</th>
-      </tr>
-    </thead>
-    <tbody id="standings-body">
-      <!-- Data will render here -->
-    </tbody>
-  </table>
-</div>
+  <div class="card">
+    <!-- League Nav -->
+    <div class="league-nav">
+      <button id="btn-mls" onclick="setLeague('mls')" class="league-btn active">⚽ MLS</button>
+      <button id="btn-cfb" onclick="setLeague('cfb')" class="league-btn">🏈 College Football</button>
+    </div>
 
-<script>
-  const rawData = [
-    { name: "Chicago Fire", gp: 16, w: 8, d: 2, l: 6, pts: 26 },
-    { name: "Columbus Crew", gp: 17, w: 5, d: 4, l: 8, pts: 19 },
-    { name: "New England Revolution", gp: 16, w: 9, d: 2, l: 5, pts: 29 },
-    { name: "New York Red Bulls", gp: 17, w: 6, d: 4, l: 7, pts: 22 },
-    { name: "D.C. United", gp: 17, w: 5, d: 7, l: 5, pts: 22 },
-    { name: "Toronto FC", gp: 18, w: 3, d: 8, l: 7, pts: 17 },
-    { name: "CF Montréal", gp: 17, w: 4, d: 3, l: 10, pts: 15 },
-    { name: "Philadelphia Union", gp: 17, w: 3, d: 4, l: 10, pts: 13 },
-    { name: "Orlando City", gp: 17, w: 6, d: 2, l: 9, pts: 20 },
-    { name: "NYCFC", gp: 18, w: 7, d: 5, l: 6, pts: 26 },
-    { name: "FC Cincinnati", gp: 17, w: 6, d: 5, l: 6, pts: 23 },
-    { name: "Atlanta United", gp: 17, w: 3, d: 3, l: 11, pts: 12 },
-    { name: "Nashville SC", gp: 17, w: 12, d: 3, l: 2, pts: 39 },
-    { name: "Inter Miami CF", gp: 17, w: 11, d: 4, l: 2, pts: 37 },
-    { name: "Charlotte FC", gp: 17, w: 7, d: 4, l: 6, pts: 25 }
-  ];
+    <!-- Conference Pills -->
+    <div class="card-header" id="pill-container">
+      <!-- Injected by JavaScript -->
+    </div>
 
-  // Sort descending by points (PTS)
-  const sortedData = rawData.sort((a, b) => b.pts - a.pts);
+    <!-- Dynamic Table -->
+    <table>
+      <thead id="table-head">
+        <!-- Injected by JavaScript -->
+      </thead>
+      <tbody id="standings-body">
+        <tr>
+          <td colspan="6" style="text-align:center; padding: 20px; color: #70757a;">Loading live data...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-  const tbody = document.getElementById("standings-body");
-  tbody.innerHTML = sortedData.map((team, i) => `
-    <tr>
-      <td><b>${i + 1}.</b> ${team.name}</td>
-      <td>${team.gp}</td>
-      <td>${team.w}</td>
-      <td>${team.d}</td>
-      <td>${team.l}</td>
-      <td class="pts">${team.pts}</td>
-    </tr>
-  `).join("");
-</script>
+  <script>
+    let currentLeague = 'mls';
+    let currentGroup = 7; // Eastern Conf default
+
+    const config = {
+      mls: {
+        pills: [
+          { name: 'Eastern Conference', id: 7 },
+          { name: 'Western Conference', id: 8 }
+        ],
+        headers: `
+          <tr>
+            <th class="align-left">Club</th>
+            <th>GP</th>
+            <th>W</th>
+            <th>D</th>
+            <th>L</th>
+            <th>PTS</th>
+          </tr>
+        `,
+        endpoint: (id) => `https://site.api.espn.com/apis/v2/sports/soccer/usa.1/standings?group=${id}`
+      },
+      cfb: {
+        pills: [
+          { name: 'SEC', id: 8 },
+          { name: 'Big Ten', id: 4 },
+          { name: 'ACC', id: 1 },
+          { name: 'Big 12', id: 12 }
+        ],
+        headers: `
+          <tr>
+            <th class="align-left">Team</th>
+            <th>CONF</th>
+            <th>OVERALL</th>
+          </tr>
+        `,
+        endpoint: (id) => `https://site.api.espn.com/apis/v2/sports/football/college-football/standings?group=${id}`
+      }
+    };
+
+    function setLeague(league) {
+      currentLeague = league;
+      document.getElementById('btn-mls').className = `league-btn ${league === 'mls' ? 'active' : ''}`;
+      document.getElementById('btn-cfb').className = `league-btn ${league === 'cfb' ? 'active' : ''}`;
+
+      currentGroup = config[league].pills[0].id;
+      renderPills();
+      loadStandings();
+    }
+
+    function renderPills() {
+      const container = document.getElementById('pill-container');
+      const pills = config[currentLeague].pills;
+
+      container.innerHTML = pills.map(p => `
+        <button onclick="setGroup(${p.id}, this)" class="pill-btn ${p.id === currentGroup ? 'active' : ''}">
+          ${p.name}
+        </button>
+      `).join('');
+    }
+
+    function setGroup(groupId, btn) {
+      currentGroup = groupId;
+      document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadStandings();
+    }
+
+    async function loadStandings() {
+      const tbody = document.getElementById('standings-body');
+      const thead = document.getElementById('table-head');
+      
+      thead.innerHTML = config[currentLeague].headers;
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#70757a;">Loading live feed...</td></tr>';
+
+      try {
+        const response = await fetch(config[currentLeague].endpoint(currentGroup));
+        const data = await response.json();
+        const entries = data.children?.[0]?.standings?.entries || data.standings?.entries || [];
+
+        if (!entries || entries.length === 0) throw new Error('No entries');
+
+        if (currentLeague === 'mls') {
+          // Parse & Sort MLS Data
+          const parsed = entries.map(item => {
+            const getStat = (name) => item.stats?.find(s => s.name === name || s.type === name)?.value || 0;
+            return {
+              name: item.team.shortDisplayName || item.team.displayName,
+              logo: item.team.logos?.[0]?.href || '',
+              gp: getStat('gamesPlayed'),
+              w: getStat('wins'),
+              d: getStat('ties'),
+              l: getStat('losses'),
+              pts: getStat('points')
+            };
+          }).sort((a, b) => b.pts - a.pts || b.w - a.w);
+
+          tbody.innerHTML = parsed.map((team, index) => `
+            <tr>
+              <td class="align-left">
+                <span class="rank">${index + 1}</span>${team.logo ? `<img src="${team.logo}" class="team-logo">` : ''}
+                <span class="team-name">${team.name}</span>
+              </td>
+              <td>${team.gp}</td>
+              <td>${team.w}</td>
+              <td>${team.d}</td>
+              <td>${team.l}</td>
+              <td class="pts">${team.pts}</td>
+            </tr>
+          `).join('');
+
+        } else {
+          // Parse CFB Data
+          tbody.innerHTML = entries.map((item, index) => {
+            const getStatVal = (names) => {
+              for (let n of names) {
+                let s = item.stats?.find(x => x.name === n || x.type === n);
+                if (s && s.displayValue !== undefined) return s.displayValue;
+              }
+              return '0';
+            };
+
+            const confWins = getStatVal(['confWins', 'vsconf', 'wins']);
+            const confLosses = getStatVal(['confLosses', 'losses']);
+            const overallWins = getStatVal(['wins', 'total']);
+            const overallLosses = getStatVal(['losses']);
+
+            return `
+              <tr>
+                <td class="align-left">
+                  <span class="rank">${index + 1}</span>${item.team.logos?.[0]?.href ? `<img src="${item.team.logos[0].href}" class="team-logo">` : ''}
+                  <span class="team-name">${item.team.shortDisplayName || item.team.displayName}</span>
+                </td>
+                <td>${confWins}-${confLosses}</td>
+                <td>${overallWins}-${overallLosses}</td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#d93025;">Unable to load live data right now.</td></tr>';
+      }
+    }
+
+    // Initialize
+    renderPills();
+    loadStandings();
+  </script>
 
 </body>
 </html>
