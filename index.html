@@ -2,148 +2,72 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MLS Eastern Conference Standings</title>
+  <title>MLS 2026 Standings</title>
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #f8f9fa;
-      color: #202124;
-      padding: 20px;
-    }
-
-    .card {
-      max-width: 720px;
-      margin: 0 auto;
-      background: #ffffff;
-      border: 1px solid #dadce0;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-
-    .card-header {
-      padding: 16px;
-      font-size: 18px;
-      font-weight: 600;
-      border-bottom: 1px solid #e8eaed;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      text-align: right;
-    }
-
-    th, td {
-      padding: 12px 10px;
-      border-bottom: 1px solid #f1f3f4;
-    }
-
-    th {
-      font-weight: 500;
-      color: #70757a;
-      font-size: 12px;
-      text-transform: uppercase;
-      background-color: #fafafa;
-    }
-
-    th.align-left, td.align-left {
-      text-align: left;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tr:hover {
-      background-color: #f8f9fa;
-    }
-
-    .rank {
-      color: #70757a;
-      width: 24px;
-      display: inline-block;
-      font-weight: 500;
-    }
-
-    .team-name {
-      font-weight: 500;
-      color: #202124;
-    }
-
-    .pts {
-      font-weight: 700;
-      color: #1a73e8;
-    }
+    body { font-family: sans-serif; margin: 20px; background-color: #f4f4f9; }
+    .table-container { max-width: 650px; margin: 0 auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    table { width: 100%; border-collapse: collapse; text-align: right; }
+    th, td { padding: 10px; border-bottom: 1px solid #ddd; }
+    th:first-child, td:first-child { text-align: left; }
+    th { font-weight: bold; background-color: #f8f9fa; }
+    .pts { font-weight: bold; color: #1a73e8; }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <div class="card-header">
-      <span>MLS — Eastern Conference</span>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th class="align-left">Club</th>
-          <th>GP</th>
-          <th>W</th>
-          <th>D</th>
-          <th>L</th>
-          <th>PTS</th>
-        </tr>
-      </thead>
-      <tbody id="standings-body">
-        <!-- Sorted data will render here -->
-      </tbody>
-    </table>
-  </div>
-
-  <script>
-    // Raw dataset matching your dashboard feeds
-    const rawData = [
-      { name: "Chicago", gp: 16, w: 8, l: 6, d: 2, pts: 26 },
-      { name: "Columbus", gp: 17, w: 5, l: 8, d: 4, pts: 19 },
-      { name: "New England", gp: 16, w: 9, l: 5, d: 2, pts: 29 },
-      { name: "Red Bull NY", gp: 17, w: 6, l: 7, d: 4, pts: 22 },
-      { name: "D.C. United", gp: 17, w: 5, l: 5, d: 7, pts: 22 },
-      { name: "Toronto", gp: 18, w: 3, l: 7, d: 8, pts: 17 },
-      { name: "CF Montréal", gp: 17, w: 4, l: 10, d: 3, pts: 15 },
-      { name: "Philadelphia", gp: 17, w: 3, l: 10, d: 4, pts: 13 },
-      { name: "Orlando", gp: 17, w: 6, l: 9, d: 2, pts: 20 },
-      { name: "NYCFC", gp: 18, w: 7, l: 6, d: 5, pts: 26 },
-      { name: "Cincinnati", gp: 17, w: 6, l: 6, d: 5, pts: 23 },
-      { name: "Atlanta", gp: 17, w: 3, l: 11, d: 3, pts: 12 },
-      { name: "Nashville", gp: 17, w: 12, l: 2, d: 3, pts: 39 },
-      { name: "Inter Miami", gp: 17, w: 11, l: 2, d: 4, pts: 37 },
-      { name: "Charlotte", gp: 17, w: 7, l: 6, d: 4, pts: 25 }
-    ];
-
-    // Sort descending by PTS, using Wins (W) as tiebreaker
-    const sortedData = rawData.sort((a, b) => b.pts - a.pts || b.w - a.w);
-
-    const tbody = document.getElementById("standings-body");
-    
-    tbody.innerHTML = sortedData.map((team, index) => `
+<div class="table-container">
+  <h2>MLS Eastern Conference (2026)</h2>
+  <table>
+    <thead>
       <tr>
-        <td class="align-left">
-          <span class="rank">${index + 1}</span>
-          <span class="team-name">${team.name}</span>
-        </td>
-        <td>${team.gp}</td>
-        <td>${team.w}</td>
-        <td>${team.d}</td>
-        <td>${team.l}</td>
-        <td class="pts">${team.pts}</td>
+        <th>Club</th>
+        <th>GP</th>
+        <th>W</th>
+        <th>D</th>
+        <th>L</th>
+        <th>PTS</th>
       </tr>
-    `).join("");
-  </script>
+    </thead>
+    <tbody id="standings-body">
+      <!-- Data will render here -->
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const rawData = [
+    { name: "Chicago Fire", gp: 16, w: 8, d: 2, l: 6, pts: 26 },
+    { name: "Columbus Crew", gp: 17, w: 5, d: 4, l: 8, pts: 19 },
+    { name: "New England Revolution", gp: 16, w: 9, d: 2, l: 5, pts: 29 },
+    { name: "New York Red Bulls", gp: 17, w: 6, d: 4, l: 7, pts: 22 },
+    { name: "D.C. United", gp: 17, w: 5, d: 7, l: 5, pts: 22 },
+    { name: "Toronto FC", gp: 18, w: 3, d: 8, l: 7, pts: 17 },
+    { name: "CF Montréal", gp: 17, w: 4, d: 3, l: 10, pts: 15 },
+    { name: "Philadelphia Union", gp: 17, w: 3, d: 4, l: 10, pts: 13 },
+    { name: "Orlando City", gp: 17, w: 6, d: 2, l: 9, pts: 20 },
+    { name: "NYCFC", gp: 18, w: 7, d: 5, l: 6, pts: 26 },
+    { name: "FC Cincinnati", gp: 17, w: 6, d: 5, l: 6, pts: 23 },
+    { name: "Atlanta United", gp: 17, w: 3, d: 3, l: 11, pts: 12 },
+    { name: "Nashville SC", gp: 17, w: 12, d: 3, l: 2, pts: 39 },
+    { name: "Inter Miami CF", gp: 17, w: 11, d: 4, l: 2, pts: 37 },
+    { name: "Charlotte FC", gp: 17, w: 7, d: 4, l: 6, pts: 25 }
+  ];
+
+  // Sort descending by points (PTS)
+  const sortedData = rawData.sort((a, b) => b.pts - a.pts);
+
+  const tbody = document.getElementById("standings-body");
+  tbody.innerHTML = sortedData.map((team, i) => `
+    <tr>
+      <td><b>${i + 1}.</b> ${team.name}</td>
+      <td>${team.gp}</td>
+      <td>${team.w}</td>
+      <td>${team.d}</td>
+      <td>${team.l}</td>
+      <td class="pts">${team.pts}</td>
+    </tr>
+  `).join("");
+</script>
 
 </body>
 </html>
