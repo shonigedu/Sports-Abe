@@ -163,9 +163,9 @@
 
   <script>
     let currentLeague = 'mls';
-    let currentGroup = 7; // Eastern Conf default
+    let currentGroup = 7; // 7 = East, 8 = West
 
-    // Backup dataset for MLS
+    // Explicit MLS Datasets
     const mlsFallback = {
       7: [ // Eastern Conference
         { name: "Inter Miami", gp: 17, w: 11, d: 4, l: 2, pts: 37, logo: "https://a.espncdn.com/i/teamlogos/soccer/500/19126.png" },
@@ -200,12 +200,12 @@
       ]
     };
 
-    // Backup dataset for College Football pre-season
+    // Pre-season CFB Fallback
     const cfbFallback = {
-      8: ["Georgia Bulldogs", "Texas Longhorns", "Alabama Crimson Tide", "Ole Miss Rebels", "LSU Tigers", "Tennessee Volunteers", "Missouri Tigers", "Oklahoma Sooners"],
-      4: ["Ohio State Buckeyes", "Oregon Ducks", "Penn State Nittany Lions", "Michigan Wolverines", "USC Trojans", "Washington Huskies", "Iowa Hawkeyes"],
-      1: ["Florida State Seminoles", "Clemson Tigers", "Miami Hurricanes", "Louisville Cardinals", "NC State Wolfpack", "SMU Mustangs"],
-      12: ["Utah Utes", "Kansas State Wildcats", "Arizona Wildcats", "Oklahoma State Cowboys", "Colorado Buffaloes", "TCU Horned Frogs"]
+      8: ["Georgia Bulldogs", "Texas Longhorns", "Alabama Crimson Tide", "Ole Miss Rebels", "LSU Tigers", "Tennessee Volunteers"],
+      4: ["Ohio State Buckeyes", "Oregon Ducks", "Penn State Nittany Lions", "Michigan Wolverines", "USC Trojans"],
+      1: ["Florida State Seminoles", "Clemson Tigers", "Miami Hurricanes", "Louisville Cardinals"],
+      12: ["Utah Utes", "Kansas State Wildcats", "Arizona Wildcats", "Oklahoma State Cowboys"]
     };
 
     const config = {
@@ -277,78 +277,56 @@
       const thead = document.getElementById('table-head');
       
       thead.innerHTML = config[currentLeague].headers;
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#70757a;">Loading feed...</td></tr>';
 
+      if (currentLeague === 'mls') {
+        // Direct rendering from fallback dataset to guarantee instant separation
+        const list = (mlsFallback[currentGroup] || mlsFallback[7]).sort((a, b) => b.pts - a.pts || b.w - a.w);
+        renderMlsRows(list);
+        return;
+      }
+
+      // College Football Handling
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#70757a;">Loading feed...</td></tr>';
       try {
-        const response = await fetch(config[currentLeague].endpoint(currentGroup));
+        const response = await fetch(config.cfb.endpoint(currentGroup));
         const data = await response.json();
         const entries = data.children?.[0]?.standings?.entries || data.standings?.entries || [];
 
-        if (!entries || entries.length === 0) throw new Error('Empty API response');
+        if (!entries || entries.length === 0) throw new Error('Empty');
 
-        if (currentLeague === 'mls') {
-          const parsed = entries.map(item => {
-            const getStat = (name) => item.stats?.find(s => s.name === name || s.type === name)?.value || 0;
-            return {
-              name: item.team.shortDisplayName || item.team.displayName,
-              logo: item.team.logos?.[0]?.href || '',
-              gp: getStat('gamesPlayed'),
-              w: getStat('wins'),
-              d: getStat('ties'),
-              l: getStat('losses'),
-              pts: getStat('points')
-            };
-          }).sort((a, b) => b.pts - a.pts || b.w - a.w);
+        tbody.innerHTML = entries.map((item, index) => {
+          const getStatVal = (names) => {
+            for (let n of names) {
+              let s = item.stats?.find(x => x.name === n || x.type === n);
+              if (s && s.displayValue !== undefined) return s.displayValue;
+            }
+            return '0';
+          };
 
-          renderMlsRows(parsed);
-        } else {
-          // Parse CFB Live
-          tbody.innerHTML = entries.map((item, index) => {
-            const getStatVal = (names) => {
-              for (let n of names) {
-                let s = item.stats?.find(x => x.name === n || x.type === n);
-                if (s && s.displayValue !== undefined) return s.displayValue;
-              }
-              return '0';
-            };
-
-            const confWins = getStatVal(['confWins', 'vsconf', 'wins']);
-            const confLosses = getStatVal(['confLosses', 'losses']);
-            const overallWins = getStatVal(['wins', 'total']);
-            const overallLosses = getStatVal(['losses']);
-
-            return `
-              <tr>
-                <td class="align-left">
-                  <span class="rank">${index + 1}</span>
-                  ${item.team.logos?.[0]?.href ? `<img src="${item.team.logos[0].href}" class="team-logo">` : ''}
-                  <span class="team-name">${item.team.shortDisplayName || item.team.displayName}</span>
-                </td>
-                <td>${confWins}-${confLosses}</td>
-                <td>${overallWins}-${overallLosses}</td>
-              </tr>
-            `;
-          }).join('');
-        }
-
-      } catch (err) {
-        if (currentLeague === 'mls') {
-          const fallbackList = (mlsFallback[currentGroup] || mlsFallback[7]).sort((a, b) => b.pts - a.pts || b.w - a.w);
-          renderMlsRows(fallbackList);
-        } else {
-          // Render Pre-Season CFB Fallback if API is empty
-          const teams = cfbFallback[currentGroup] || cfbFallback[8];
-          tbody.innerHTML = teams.map((teamName, index) => `
+          return `
             <tr>
               <td class="align-left">
                 <span class="rank">${index + 1}</span>
-                <span class="team-name">${teamName}</span>
+                ${item.team.logos?.[0]?.href ? `<img src="${item.team.logos[0].href}" class="team-logo">` : ''}
+                <span class="team-name">${item.team.shortDisplayName || item.team.displayName}</span>
               </td>
-              <td>0-0</td>
-              <td>0-0</td>
+              <td>${getStatVal(['confWins', 'vsconf', 'wins'])}-${getStatVal(['confLosses', 'losses'])}</td>
+              <td>${getStatVal(['wins', 'total'])}-${getStatVal(['losses'])}</td>
             </tr>
-          `).join('');
-        }
+          `;
+        }).join('');
+      } catch (err) {
+        const teams = cfbFallback[currentGroup] || cfbFallback[8];
+        tbody.innerHTML = teams.map((teamName, index) => `
+          <tr>
+            <td class="align-left">
+              <span class="rank">${index + 1}</span>
+              <span class="team-name">${teamName}</span>
+            </td>
+            <td>0-0</td>
+            <td>0-0</td>
+          </tr>
+        `).join('');
       }
     }
 
