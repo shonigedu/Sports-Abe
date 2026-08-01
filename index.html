@@ -1,178 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sports Standings</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MLS Eastern Conference Standings</title>
   <style>
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f8f9fa;
+      color: #202124;
+      padding: 20px;
+    }
+
+    .card {
+      max-width: 720px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      border-bottom: 1px solid #e8eaed;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      text-align: right;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #f1f3f4;
+    }
+
+    th {
+      font-weight: 500;
+      color: #70757a;
+      font-size: 12px;
+      text-transform: uppercase;
+      background-color: #fafafa;
+    }
+
+    th.align-left, td.align-left {
+      text-align: left;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .rank {
+      color: #70757a;
+      width: 24px;
+      display: inline-block;
+      font-weight: 500;
+    }
+
+    .team-name {
+      font-weight: 500;
+      color: #202124;
+    }
+
+    .pts {
+      font-weight: 700;
+      color: #1a73e8;
+    }
   </style>
 </head>
-<body class="bg-[#f8f9fa] min-h-screen text-[#202124] font-sans p-2 sm:p-6 flex justify-center items-start">
+<body>
 
-  <!-- Main Container -->
-  <div class="w-full max-w-2xl bg-white border border-[#dadce0] rounded-xl shadow-sm overflow-hidden my-4">
-    
-    <!-- Top League Selector (CFB vs MLS) -->
-    <div class="px-4 py-3 border-b border-[#dadce0] bg-[#f8f9fa] flex gap-2">
-      <button id="league-cfb" onclick="switchLeague('cfb')" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#1a73e8] text-white shadow-sm transition-all">🏈 College Football</button>
-      <button id="league-mls" onclick="switchLeague('mls')" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-white border border-[#dadce0] text-[#3c4043] hover:bg-[#f1f3f4] transition-all">⚽ MLS</button>
+  <div class="card">
+    <div class="card-header">
+      <span>MLS — Eastern Conference</span>
     </div>
-
-    <!-- Conference / Division Pills Bar -->
-    <div class="px-4 pt-3 pb-2 border-b border-[#f1f3f4] overflow-x-auto no-scrollbar flex gap-2 bg-white" id="pillBar">
-      <!-- Injected dynamically -->
-    </div>
-
-    <!-- Standings Table -->
-    <div class="overflow-x-auto">
-      <table class="w-full text-left text-xs sm:text-sm">
-        <thead>
-          <tr class="text-[#5f6368] font-medium border-b border-[#f1f3f4] bg-[#f8f9fa]">
-            <th class="py-2.5 px-4 font-normal w-full">TEAM</th>
-            <th class="py-2.5 px-3 text-center font-normal whitespace-nowrap" id="statHeader1">CONF</th>
-            <th class="py-2.5 px-4 text-center font-normal whitespace-nowrap" id="statHeader2">OVERALL</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody" class="divide-y divide-[#f1f3f4]">
-          <tr>
-            <td colspan="3" class="py-8 text-center text-[#70757a]">Loading standings...</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
+    <table>
+      <thead>
+        <tr>
+          <th class="align-left">Club</th>
+          <th>GP</th>
+          <th>W</th>
+          <th>D</th>
+          <th>L</th>
+          <th>PTS</th>
+        </tr>
+      </thead>
+      <tbody id="standings-body">
+        <!-- Sorted data will render here -->
+      </tbody>
+    </table>
   </div>
 
   <script>
-    let currentLeague = 'cfb';
-    let currentGroup = 'sec';
+    // Raw dataset matching your dashboard feeds
+    const rawData = [
+      { name: "Chicago", gp: 16, w: 8, l: 6, d: 2, pts: 26 },
+      { name: "Columbus", gp: 17, w: 5, l: 8, d: 4, pts: 19 },
+      { name: "New England", gp: 16, w: 9, l: 5, d: 2, pts: 29 },
+      { name: "Red Bull NY", gp: 17, w: 6, l: 7, d: 4, pts: 22 },
+      { name: "D.C. United", gp: 17, w: 5, l: 5, d: 7, pts: 22 },
+      { name: "Toronto", gp: 18, w: 3, l: 7, d: 8, pts: 17 },
+      { name: "CF Montréal", gp: 17, w: 4, l: 10, d: 3, pts: 15 },
+      { name: "Philadelphia", gp: 17, w: 3, l: 10, d: 4, pts: 13 },
+      { name: "Orlando", gp: 17, w: 6, l: 9, d: 2, pts: 20 },
+      { name: "NYCFC", gp: 18, w: 7, l: 6, d: 5, pts: 26 },
+      { name: "Cincinnati", gp: 17, w: 6, l: 6, d: 5, pts: 23 },
+      { name: "Atlanta", gp: 17, w: 3, l: 11, d: 3, pts: 12 },
+      { name: "Nashville", gp: 17, w: 12, l: 2, d: 3, pts: 39 },
+      { name: "Inter Miami", gp: 17, w: 11, l: 2, d: 4, pts: 37 },
+      { name: "Charlotte", gp: 17, w: 7, l: 6, d: 4, pts: 25 }
+    ];
 
-    const leagueConfigs = {
-      cfb: {
-        header1: 'CONF',
-        header2: 'OVERALL',
-        pills: [
-          { key: 'sec', label: 'SEC', id: 8 },
-          { key: 'big-ten', label: 'Big Ten', id: 4 },
-          { key: 'acc', label: 'ACC', id: 1 },
-          { key: 'big-12', label: 'Big 12', id: 12 }
-        ],
-        endpoint: (id) => `https://site.api.espn.com/apis/v2/sports/football/college-football/standings?group=${id}`
-      },
-      mls: {
-        header1: 'PTS',
-        header2: 'W-L-D',
-        pills: [
-          { key: 'east', label: 'Eastern Conf', id: 7 },
-          { key: 'west', label: 'Western Conf', id: 8 }
-        ],
-        endpoint: (id) => `https://site.api.espn.com/apis/v2/sports/soccer/usa.1/standings?group=${id}`
-      }
-    };
+    // Sort descending by PTS, using Wins (W) as tiebreaker
+    const sortedData = rawData.sort((a, b) => b.pts - a.pts || b.w - a.w);
 
-    function switchLeague(leagueKey) {
-      currentLeague = leagueKey;
-
-      // Style active top buttons
-      document.getElementById('league-cfb').className = leagueKey === 'cfb' 
-        ? 'px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#1a73e8] text-white shadow-sm transition-all'
-        : 'px-4 py-1.5 rounded-lg text-xs font-semibold bg-white border border-[#dadce0] text-[#3c4043] hover:bg-[#f1f3f4] transition-all';
-      
-      document.getElementById('league-mls').className = leagueKey === 'mls' 
-        ? 'px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#1a73e8] text-white shadow-sm transition-all'
-        : 'px-4 py-1.5 rounded-lg text-xs font-semibold bg-white border border-[#dadce0] text-[#3c4043] hover:bg-[#f1f3f4] transition-all';
-
-      const config = leagueConfigs[leagueKey];
-      document.getElementById('statHeader1').textContent = config.header1;
-      document.getElementById('statHeader2').textContent = config.header2;
-
-      // Render Pills
-      const pillBar = document.getElementById('pillBar');
-      pillBar.innerHTML = config.pills.map((p, idx) => `
-        <button onclick="selectGroup('${p.key}', this)" class="conf-pill ${idx === 0 ? 'active bg-[#202124] text-white' : 'bg-[#f1f3f4] text-[#3c4043] hover:bg-[#e8eaed]'} text-xs font-medium px-4 py-1.5 rounded-full whitespace-nowrap transition-all">${p.label}</button>
-      `).join('');
-
-      currentGroup = config.pills[0].key;
-      loadStandings();
-    }
-
-    function selectGroup(groupKey, btn) {
-      currentGroup = groupKey;
-      document.querySelectorAll('.conf-pill').forEach(b => {
-        b.className = 'conf-pill bg-[#f1f3f4] text-[#3c4043] hover:bg-[#e8eaed] text-xs font-medium px-4 py-1.5 rounded-full whitespace-nowrap transition-all';
-      });
-      btn.className = 'conf-pill active bg-[#202124] text-white text-xs font-medium px-4 py-1.5 rounded-full whitespace-nowrap transition-all';
-      loadStandings();
-    }
-
-    async function loadStandings() {
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '<tr><td colspan="3" class="py-8 text-center text-[#70757a]">Loading live data...</td></tr>';
-
-      const config = leagueConfigs[currentLeague];
-      const pillObj = config.pills.find(p => p.key === currentGroup) || config.pills[0];
-
-      try {
-        const response = await fetch(config.endpoint(pillObj.id));
-        if (!response.ok) throw new Error('Network error');
-        const json = await response.json();
-
-        let entries = json.children?.[0]?.standings?.entries || json.standings?.entries || [];
-
-        if (entries.length > 0) {
-          tbody.innerHTML = entries.map((item, idx) => {
-            const team = item.team;
-            const logo = team.logos?.[0]?.href || '';
-            const name = team.shortDisplayName || team.displayName;
-
-            let col1 = '0';
-            let col2 = '0-0-0';
-
-            if (currentLeague === 'cfb') {
-              col1 = getStat(item, ['confWins', 'vsconf', 'wins']) + '-' + getStat(item, ['confLosses', 'losses']);
-              col2 = getStat(item, ['wins', 'total']) + '-' + getStat(item, ['losses']);
-            } else { // MLS
-              col1 = getStat(item, ['points', 'pts']) || '0';
-              const w = getStat(item, ['wins']);
-              const l = getStat(item, ['losses']);
-              const d = getStat(item, ['ties', 'draws']);
-              col2 = `${w}-${l}-${d}`;
-            }
-
-            return `
-              <tr class="hover:bg-[#f8f9fa] transition-colors">
-                <td class="py-2.5 px-4 flex items-center gap-3">
-                  <span class="text-xs font-normal text-[#70757a] w-4 text-right">${idx + 1}</span>
-                  ${logo ? `<img src="${logo}" class="w-5 h-5 object-contain" alt="">` : ''}
-                  <span class="font-medium text-[#202124] text-xs sm:text-sm">${name}</span>
-                </td>
-                <td class="py-2.5 px-3 text-center font-medium text-[#202124] text-xs sm:text-sm">${col1}</td>
-                <td class="py-2.5 px-4 text-center text-[#5f6368] text-xs sm:text-sm">${col2}</td>
-              </tr>
-            `;
-          }).join('');
-        } else {
-          throw new Error('Empty standings response');
-        }
-      } catch (err) {
-        tbody.innerHTML = '<tr><td colspan="3" class="py-8 text-center text-[#70757a]">No active standings data right now.</td></tr>';
-      }
-    }
-
-    function getStat(item, names) {
-      if (!item.stats) return '0';
-      for (let n of names) {
-        let s = item.stats.find(x => x.name === n || x.type === n);
-        if (s && s.displayValue !== undefined) return s.displayValue;
-      }
-      return '0';
-    }
-
-    // Initialize
-    switchLeague('cfb');
+    const tbody = document.getElementById("standings-body");
+    
+    tbody.innerHTML = sortedData.map((team, index) => `
+      <tr>
+        <td class="align-left">
+          <span class="rank">${index + 1}</span>
+          <span class="team-name">${team.name}</span>
+        </td>
+        <td>${team.gp}</td>
+        <td>${team.w}</td>
+        <td>${team.d}</td>
+        <td>${team.l}</td>
+        <td class="pts">${team.pts}</td>
+      </tr>
+    `).join("");
   </script>
+
 </body>
 </html>
