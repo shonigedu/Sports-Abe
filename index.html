@@ -57,7 +57,9 @@
       gap: 8px;
       overflow-x: auto;
       background: #ffffff;
+      scrollbar-width: none;
     }
+    .card-header::-webkit-scrollbar { display: none; }
 
     .pill-btn {
       padding: 5px 12px;
@@ -144,7 +146,7 @@
       <button id="btn-cfb" onclick="setLeague('cfb')" class="league-btn">🏈 College Football</button>
     </div>
 
-    <!-- Conference Pills -->
+    <!-- Conference / Poll Pills -->
     <div class="card-header" id="pill-container">
       <!-- Injected by JavaScript -->
     </div>
@@ -156,7 +158,7 @@
       </thead>
       <tbody id="standings-body">
         <tr>
-          <td colspan="6" style="text-align:center; padding: 20px; color: #70757a;">Loading live data...</td>
+          <td colspan="6" style="text-align:center; padding: 20px; color: #70757a;">Loading feed...</td>
         </tr>
       </tbody>
     </table>
@@ -164,7 +166,7 @@
 
   <script>
     let currentLeague = 'mls';
-    let currentGroup = 7; // 7 = East, 8 = West
+    let currentGroup = 7;
 
     const config = {
       mls: {
@@ -181,15 +183,22 @@
             <th>L</th>
             <th>PTS</th>
           </tr>
-        `,
-        endpoint: (id) => `https://site.api.espn.com/apis/v2/sports/soccer/usa.1/standings?group=${id}`
+        `
       },
       cfb: {
         pills: [
+          { name: '🏆 Top 25', id: 'top25' },
           { name: 'SEC', id: 8 },
           { name: 'Big Ten', id: 4 },
           { name: 'ACC', id: 1 },
-          { name: 'Big 12', id: 12 }
+          { name: 'Big 12', id: 12 },
+          { name: 'Pac-12', id: 9 },
+          { name: 'AAC', id: 151 },
+          { name: 'Mountain West', id: 17 },
+          { name: 'Sun Belt', id: 37 },
+          { name: 'MAC', id: 15 },
+          { name: 'C-USA', id: 12 },
+          { name: 'Independents', id: 18 }
         ],
         headers: `
           <tr>
@@ -197,8 +206,7 @@
             <th>CONF</th>
             <th>OVERALL</th>
           </tr>
-        `,
-        endpoint: (id) => `https://site.api.espn.com/apis/v2/sports/football/college-football/standings?group=${id}`
+        `
       }
     };
 
@@ -217,7 +225,7 @@
       const pills = config[currentLeague].pills;
 
       container.innerHTML = pills.map(p => `
-        <button onclick="setGroup(${p.id}, this)" class="pill-btn ${p.id === currentGroup ? 'active' : ''}">
+        <button onclick="setGroup('${p.id}', this)" class="pill-btn ${p.id == currentGroup ? 'active' : ''}">
           ${p.name}
         </button>
       `).join('');
@@ -230,7 +238,7 @@
       loadStandings();
     }
 
-async function loadStandings() {
+    async function loadStandings() {
       const tbody = document.getElementById('standings-body');
       const thead = document.getElementById('table-head');
       
@@ -239,11 +247,10 @@ async function loadStandings() {
 
       try {
         if (currentLeague === 'mls') {
-          // Fetch full MLS standings directly
+          // Live MLS Fetch
           const response = await fetch('https://site.api.espn.com/apis/v2/sports/soccer/usa.1/standings');
           const data = await response.json();
           
-          // Match Eastern (7) vs Western (8) dynamically from ESPN's children array
           const confGroup = data.children?.find(c => c.id == currentGroup || (currentGroup == 8 ? c.name?.toLowerCase().includes('west') : c.name?.toLowerCase().includes('east')));
           const entries = confGroup?.standings?.entries || data.standings?.entries || [];
 
@@ -270,8 +277,7 @@ async function loadStandings() {
           tbody.innerHTML = parsed.map((team, index) => `
             <tr>
               <td class="align-left">
-                <span class="rank">${index + 1}</span>
-                ${team.logo ? `<img src="${team.logo}" class="team-logo" onerror="this.style.display='none'">` : ''}
+                <span class="rank">${index + 1}</span>${team.logo ? `<img src="${team.logo}" class="team-logo" onerror="this.style.display='none'">` : ''}
                 <span class="team-name">${team.name}</span>
               </td>
               <td>${team.gp}</td>
@@ -282,9 +288,28 @@ async function loadStandings() {
             </tr>
           `).join('');
 
+        } else if (currentGroup === 'top25') {
+          // Live AP Poll Top 25 Fetch
+          const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings');
+          const data = await response.json();
+          const ranks = data.rankings?.[0]?.ranks || [];
+
+          if (!ranks || ranks.length === 0) throw new Error('Top 25 unavailable');
+
+          tbody.innerHTML = ranks.map(item => `
+            <tr>
+              <td class="align-left">
+                <span class="rank">${item.current}</span>${item.team.logo ? `<img src="${item.team.logo}" class="team-logo" onerror="this.style.display='none'">` : ''}
+                <span class="team-name">${item.team.nickname || item.team.location}</span>
+              </td>
+              <td>${item.recordSummary || '0-0'}</td>
+              <td>${item.recordSummary || '0-0'}</td>
+            </tr>
+          `).join('');
+
         } else {
-          // Fetch College Football
-          const response = await fetch(config.cfb.endpoint(currentGroup));
+          // Live CFB Conference Standings Fetch
+          const response = await fetch(`https://site.api.espn.com/apis/v2/sports/football/college-football/standings?group=${currentGroup}`);
           const data = await response.json();
           const entries = data.children?.[0]?.standings?.entries || data.standings?.entries || [];
 
@@ -302,8 +327,7 @@ async function loadStandings() {
             return `
               <tr>
                 <td class="align-left">
-                  <span class="rank">${index + 1}</span>
-                  ${item.team.logos?.[0]?.href ? `<img src="${item.team.logos[0].href}" class="team-logo">` : ''}
+                  <span class="rank">${index + 1}</span>${item.team.logos?.[0]?.href ? `<img src="${item.team.logos[0].href}" class="team-logo" onerror="this.style.display='none'">` : ''}
                   <span class="team-name">${item.team.shortDisplayName || item.team.displayName}</span>
                 </td>
                 <td>${getStatVal(['confWins', 'vsconf', 'wins'])}-${getStatVal(['confLosses', 'losses'])}</td>
