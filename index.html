@@ -14,7 +14,7 @@
     }
 
     .card {
-      max-width: 720px;
+      max-width: 850px;
       margin: 0 auto;
       background: #ffffff;
       border: 1px solid #dadce0;
@@ -135,6 +135,65 @@
       font-weight: 700;
       color: #1a73e8;
     }
+
+    /* Bracket Container Styling */
+    .bracket-container {
+      display: flex;
+      justify-content: space-between;
+      padding: 20px 16px;
+      gap: 16px;
+      overflow-x: auto;
+      background: #fafafa;
+    }
+
+    .bracket-round {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      min-width: 170px;
+    }
+
+    .round-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #70757a;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .matchup {
+      background: #ffffff;
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      margin: 8px 0;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .team-slot {
+      padding: 8px 10px;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #f1f3f4;
+    }
+
+    .team-slot:last-child {
+      border-bottom: none;
+    }
+
+    .team-slot.winner {
+      font-weight: 700;
+      background: #e8f0fe;
+      color: #1a73e8;
+    }
+
+    .seed {
+      font-size: 10px;
+      color: #70757a;
+      margin-right: 4px;
+    }
   </style>
 </head>
 <body>
@@ -144,29 +203,97 @@
     <div class="league-nav">
       <button id="btn-mls" onclick="setLeague('mls')" class="league-btn active">⚽ MLS</button>
       <button id="btn-cfb" onclick="setLeague('cfb')" class="league-btn">🏈 College Football</button>
+      <button id="btn-bracket" onclick="setLeague('bracket')" class="league-btn">🏆 Bracket View</button>
     </div>
 
-    <!-- Conference / Poll Pills -->
+    <!-- Conference / Poll / Bracket Pills -->
     <div class="card-header" id="pill-container">
       <!-- Injected by JavaScript -->
     </div>
 
-    <!-- Dynamic Table -->
-    <table>
-      <thead id="table-head">
-        <!-- Injected by JavaScript -->
-      </thead>
-      <tbody id="standings-body">
-        <tr>
-          <td colspan="6" style="text-align:center; padding: 20px; color: #70757a;">Loading feed...</td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Main Dynamic Content Container -->
+    <div id="content-display">
+      <table>
+        <thead id="table-head"></thead>
+        <tbody id="standings-body">
+          <tr>
+            <td colspan="6" style="text-align:center; padding: 20px; color: #70757a;">Loading feed...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script>
     let currentLeague = 'mls';
     let currentGroup = 7;
+
+    // Bracket Data
+    const bracketData = {
+      cfp: {
+        title: "12-Team College Football Playoff",
+        rounds: [
+          {
+            name: "First Round",
+            matchups: [
+              { t1: "5 Oregon", s1: "34", t2: "12 Boise St", s2: "14", w: 1 },
+              { t1: "6 Penn State", s1: "28", t2: "11 Indiana", s2: "17", w: 1 },
+              { t1: "7 Notre Dame", s1: "24", t2: "10 SMU", s2: "10", w: 1 },
+              { t1: "8 Ohio State", s1: "42", t2: "9 Tennessee", s2: "17", w: 1 }
+            ]
+          },
+          {
+            name: "Quarterfinals",
+            matchups: [
+              { t1: "1 Oregon", s1: "--", t2: "8 Ohio State", s2: "--" },
+              { t1: "2 Georgia", s1: "--", t2: "7 Notre Dame", s2: "--" },
+              { t1: "3 Boise State", s1: "--", t2: "6 Penn State", s2: "--" },
+              { t1: "4 Arizona St", s1: "--", t2: "5 Oregon", s2: "--" }
+            ]
+          },
+          {
+            name: "Semifinals",
+            matchups: [
+              { t1: "TBD", s1: "", t2: "TBD", s2: "" },
+              { t1: "TBD", s1: "", t2: "TBD", s2: "" }
+            ]
+          },
+          {
+            name: "Championship",
+            matchups: [
+              { t1: "TBD", s1: "", t2: "TBD", s2: "" }
+            ]
+          }
+        ]
+      },
+      mls: {
+        title: "MLS Cup Playoffs",
+        rounds: [
+          {
+            name: "Conf. Semifinals",
+            matchups: [
+              { t1: "1 Inter Miami", s1: "2", t2: "4 NYCFC", s2: "1", w: 1 },
+              { t1: "2 Cincinnati", s1: "1", t2: "3 Columbus", s2: "2", w: 2 },
+              { t1: "1 LAFC", s1: "3", t2: "4 LA Galaxy", s2: "1", w: 1 },
+              { t1: "2 Real Salt Lake", s1: "0", t2: "3 Seattle", s2: "1", w: 2 }
+            ]
+          },
+          {
+            name: "Conf. Finals",
+            matchups: [
+              { t1: "1 Inter Miami", s1: "--", t2: "3 Columbus", s2: "--" },
+              { t1: "1 LAFC", s1: "--", t2: "3 Seattle", s2: "--" }
+            ]
+          },
+          {
+            name: "MLS Cup Final",
+            matchups: [
+              { t1: "TBD", s1: "", t2: "TBD", s2: "" }
+            ]
+          }
+        ]
+      }
+    };
 
     const config = {
       mls: {
@@ -207,6 +334,13 @@
             <th>OVERALL</th>
           </tr>
         `
+      },
+      bracket: {
+        pills: [
+          { name: '🏈 CFP Playoff Bracket', id: 'cfp' },
+          { name: '⚽ MLS Cup Bracket', id: 'mls' }
+        ],
+        headers: ``
       }
     };
 
@@ -214,10 +348,11 @@
       currentLeague = league;
       document.getElementById('btn-mls').className = `league-btn ${league === 'mls' ? 'active' : ''}`;
       document.getElementById('btn-cfb').className = `league-btn ${league === 'cfb' ? 'active' : ''}`;
+      document.getElementById('btn-bracket').className = `league-btn ${league === 'bracket' ? 'active' : ''}`;
 
       currentGroup = config[league].pills[0].id;
       renderPills();
-      loadStandings();
+      loadContent();
     }
 
     function renderPills() {
@@ -235,15 +370,63 @@
       currentGroup = groupId;
       document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      loadStandings();
+      loadContent();
+    }
+
+    function loadContent() {
+      if (currentLeague === 'bracket') {
+        renderBracket();
+      } else {
+        renderTableStructure();
+        loadStandings();
+      }
+    }
+
+    function renderTableStructure() {
+      const display = document.getElementById('content-display');
+      display.innerHTML = `
+        <table>
+          <thead id="table-head">${config[currentLeague].headers}</thead>
+          <tbody id="standings-body">
+            <tr><td colspan="6" style="text-align:center; padding:20px; color:#70757a;">Loading feed...</td></tr>
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderBracket() {
+      const display = document.getElementById('content-display');
+      const data = bracketData[currentGroup] || bracketData['cfp'];
+
+      display.innerHTML = `
+        <div class="bracket-container">
+          ${data.rounds.map(r => `
+            <div class="bracket-round">
+              <div class="round-title">${r.name}</div>
+              ${r.matchups.map(m => `
+                <div class="matchup">
+                  <div class="team-slot ${m.w === 1 ? 'winner' : ''}">
+                    <span>${m.t1}</span>
+                    <span>${m.s1}</span>
+                  </div>
+                  <div class="team-slot ${m.w === 2 ? 'winner' : ''}">
+                    <span>${m.t2}</span>
+                    <span>${m.s2}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `).join('')}
+        </div>
+      `;
     }
 
     async function loadStandings() {
       const tbody = document.getElementById('standings-body');
       const thead = document.getElementById('table-head');
+      if (!tbody) return;
       
       thead.innerHTML = config[currentLeague].headers;
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#70757a;">Loading live feed...</td></tr>';
 
       try {
         if (currentLeague === 'mls') {
@@ -345,7 +528,7 @@
 
     // Initialize
     renderPills();
-    loadStandings();
+    loadContent();
   </script>
 
 </body>
